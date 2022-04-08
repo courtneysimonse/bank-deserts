@@ -63,6 +63,17 @@
       }
     }).addTo(map);
 
+    var censusTractsLayer = L.geoJson(null, {
+        style: function(feature) {
+          return {
+            stroke: false,
+            fillColor: 'red'
+          }
+        }
+    });
+    // this can be any kind of omnivore layer
+    var runLayer = omnivore.topojson('data/census_tracts2010_topo.json', null, censusTractsLayer).addTo(map);
+
   }   //end drawMap()
 
   function drawLegend(breaks, colorize) {
