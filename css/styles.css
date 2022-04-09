@@ -31,7 +31,7 @@ h1 {
   border-radius: 5px;
 }
 
-footer {
+/* footer {
     padding: 6px 10%;
     width: 80%;
 }
@@ -116,4 +116,63 @@ p {
 label {
     font-size: 1.1em;
     font-weight: bold;
+} */
+
+@keyframes spinner {
+        0% {
+          transform: translate3d(-50%, -50%, 0) rotate(0deg);
+        }
+        100% {
+          transform: translate3d(-50%, -50%, 0) rotate(360deg);
+        }
+      }
+
+#spin::before {
+  animation: 1.5s linear infinite spinner;
+  animation-play-state: inherit;
+  border: solid 5px #cfd0d1;
+  border-bottom-color: #1c87c9;
+  border-radius: 50%;
+  content: "";
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  width: 40px;
+  will-change: transform;
+}
+
+.legend {
+  background-color: whitesmoke;
+  padding: 3px;
+  width: 135px;
+}
+
+.legend h4 {
+  padding: 5px;
+  margin-left: 3px;
+  margin-right: 3px;
+  margin-bottom: 0px;
+}
+
+.legend div {
+  padding: 5px 3px;
+}
+
+.legend input {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.control-layers-selector {
+  margin-top: 2px;
+  position: relative;
+  top: 1px;
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  float: left;
 }

@@ -1,113 +1,194 @@
-(function () {
+mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZWIyd28xdDJ2MXduNTcifQ.PoSFtqfsq1di1IDXzlN4PA';
+  const map = new mapboxgl.Map({
+  container: 'mapid', // container ID
+  style: null,
+  // style: 'mapbox://styles/mapbox/light-v10', // style URL
+  projection: 'albers',
+  center: [-97, 39], // starting position
+  minZoom: 6,
+  zoom: 6 // starting zoom
+});
 
-  // US map options
-  var options = {
-    zoomSnap: .5,
-    center: [39, -97],
-    zoom: 5,
-    minZoom: 2,
-    zoomControl: false,
-    // attributionControl: false
-  }
-
-  // create map
-  var map = L.map('mapid', options);
-
-  // request tiles and add to map
-  var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  	maxZoom: 19,
-  	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
-
-  // change zoom control position
-  L.control.zoom({
-    position: 'bottomleft'
-  }).addTo(map);
+const spinner = document.getElementById('spin');
+spinner.classList = 'invisible';
 
 
-  // GET DATA
-  processData();
 
-  // PROCESS DATA FUNCTION
-  function processData() {
+map.on('load', () => {
+  //
+  // map.addSource('states', {
+  //   'type': 'geojson',
+  //   'data': 'data/states.geojson'
+  // });
+  //
+  // map.addLayer({
+  //   'id': 'states',
+  //   'type': 'line',
+  //   'source': 'states',
+  //   'paint': {
+  //     'line-color': '#838383',
+  //     'line-width': 2
+  //   }
+  // });
 
-    drawMap();
+  map.addSource("ct2010", {
+    type: "vector",
+    tiles: ["https://gis.data.census.gov/arcgis/rest/services/Hosted/VT_2010_140_00_PY_D1/VectorTileServer/tile/{z}/{y}/{x}.pbf"],
+    minzoom: 6,
+    promoteId: "GEOID" // promote field to be used as a foreign key
+  })
 
-    // example breaks for legend
-    var breaks = [1, 4, 7, 10];
-    var colorize = chroma.scale(chroma.brewer.BuGn).classes(breaks).mode('lab');
-
-    drawLegend(breaks, colorize);
-
-  }   //end processData()
-
-  // DRAW MAP FUNCTION
-  function drawMap() {
-
-    var statesLayer = L.geoJson(states, {
-      style: function (feature) {
-        return {
-          color: 'black',
-          weight: 2,
-          fill: false
-        }
-      }
-    }).addTo(map);
-    var cdLayer = L.geoJson(cd2020, {
-      style: function (feature) {
-        return {
-          color: 'black',
-          weight: 1,
-          fill: false
-        }
-      }
-    }).addTo(map);
-
-    var censusTractsLayer = L.geoJson(null, {
-        style: function(feature) {
-          return {
-            stroke: false,
-            fillColor: 'red'
-          }
-        }
-    });
-    // this can be any kind of omnivore layer
-    var runLayer = omnivore.topojson('data/census_tracts2010_topo.json', null, censusTractsLayer).addTo(map);
-
-  }   //end drawMap()
-
-  function drawLegend(breaks, colorize) {
-
-    var legendControl = L.control({
-      position: 'topright'
-    });
-
-    legendControl.onAdd = function(map) {
-
-      var legend = L.DomUtil.create('div', 'legend');
-      return legend;
-
-    };
-
-    legendControl.addTo(map);
-
-    var legend = document.querySelector('.legend');
-    var legendHTML = "<h3><span>YYYY</span> Legend</h3><ul>";
-
-    for (var i = 0; i < breaks.length - 1; i++) {
-
-      var color = colorize(breaks[i], breaks);
-
-      var classRange = '<li><span style="background:' + color + '"></span> ' +
-          breaks[i].toLocaleString() + ' &mdash; ' +
-          breaks[i + 1].toLocaleString() + '</li>'
-      legendHTML += classRange;
-
+  map.addLayer({
+    id: "ct-fill",
+    type: "fill",
+    source: "ct2010",
+    "source-layer": "CensusTract",
+    paint: {
+      "fill-opacity": 0.8,
+      "fill-color": "grey"
     }
+  });
 
-    legendHTML += '</ul><p>(Data from SOURCE)</p>';
-    legend.innerHTML = legendHTML;
+  // Add a data source containing GeoJSON data.
+  // map.addSource('ct2010', {
+  //   'type': 'geojson',
+  //   'data': 'data/ct_2010_filtered80.geojson' //"id":"cl1qvff4216tk20rs0af1x858"
+  // });
 
-  } // end drawLegend()
+  // Add a new layer to visualize the polygon.
+  map.addLayer({
+    'id': 'cdfi',
+    'type': 'fill',
+    'source': 'ct2010', // reference the data source
+    "source-layer": "CensusTract",
+    'layout': {},
+    'paint': {
+      'fill-color': 'rgb(13,40,75)',
+      'fill-opacity': 0.5
+    },
+    'filter': ['==', 'cdfi2015', true]
 
-})();
+  });
+  map.addLayer({
+    'id': 'nmtc',
+    'type': 'fill',
+    'source': 'ct2010',
+    "source-layer": "CensusTract",
+    'layout': {},
+    'paint': {
+      'fill-color': 'rgb(0,155,177)',
+      'fill-opacity': 0.5
+    },
+    'filter': ['==', 'nmtc2015', true]
+  });
+  map.addLayer({
+    'id': 'deserts',
+    'type': 'fill',
+    'source': 'ct2010',
+    "source-layer": "CensusTract",
+    'layout': {},
+    'paint': {
+      'fill-color': 'rgb(128,154,28)',
+      'fill-opacity': 0.5
+    },
+    'filter': ['==', 'deserts2020', true]
+  });
+
+
+  map.addSource('cd2020', {
+    'type': 'geojson',
+    'data': 'data/congressional_districts2020.geojson'
+  });
+
+  map.addLayer({
+    'id': 'cd2020white',
+    'type': 'line',
+    'source': 'cd2020',
+    'paint': {
+      'line-color': '#fff',
+      'line-width': 2.5
+    }
+  });
+
+  map.addLayer({
+    'id': 'cd2020gray',
+    'type': 'line',
+    'source': 'cd2020',
+    'paint': {
+      'line-color': '#838383',
+      'line-width': 1.5
+    }
+  });
+
+  map.addControl(new legendControl());
+
+  const checkCDFI = document.getElementById('check-CDFI');
+  checkCDFI.addEventListener('change', function(event) {
+
+  	if (checkCDFI.checked == false) {
+      map.setLayoutProperty('cdfi','visibility','none');
+  	} else {
+  		map.setLayoutProperty('cdfi','visibility','visible');
+  	}
+  });
+
+  const checkNMTC = document.getElementById('check-NMTC');
+  checkNMTC.addEventListener('change', function(event) {
+
+  	if (checkNMTC.checked == false) {
+  		map.setLayoutProperty('nmtc','visibility','none');
+  	} else {
+  		map.setLayoutProperty('nmtc','visibility','visible');
+  	}
+  });
+
+  const checkDeserts = document.getElementById('check-BankDeserts');
+  checkDeserts.addEventListener('change', function(event) {
+
+  	if (checkDeserts.checked == false) {
+  		map.setLayoutProperty('deserts','visibility','none');
+  	} else {
+  		map.setLayoutProperty('deserts','visibility','visible');
+  	}
+  });
+});
+
+map.on('render', () => {
+  spinner.classList = '';
+});
+
+map.on('idle', () => {
+  spinner.classList = 'invisible';
+});
+
+var categories = {
+  'CDFI': 'rgb(13,40,75)',
+  'NMTC': 'rgb(0,155,177)',
+  'Bank Deserts': 'rgb(128,154,28)'
+};
+
+class legendControl {
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement('div');
+    this._container.className = 'mapboxgl-ctrl legend';
+    let content = '<h4>Legend</h4>';
+    content += '<div>';
+    for (var item in categories) {
+      if (categories.hasOwnProperty(item)) {
+        content += '<label><div>';
+        content += '<input type="checkbox" class="control-layers-selector" id="check-' + item.replace(/\s/g,'') + '" checked="">';
+        content += '<span><span class="legendColor" style="background:' + categories[item] + '"></span>' + item + '</span>';
+        content += '</div></label>';
+      }
+    }
+    content += '</div>';
+
+    this._container.innerHTML = content;
+    return this._container;
+  }
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}
