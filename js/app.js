@@ -4,6 +4,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZ
   style: null,
   // style: 'mapbox://styles/mapbox/light-v10', // style URL
   projection: 'albers',
+  maxTileCacheSize: null,
   center: [-97, 39], // starting position
   minZoom: 6,
   zoom: 6 // starting zoom
@@ -12,7 +13,22 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZ
 const spinner = document.getElementById('spin');
 spinner.classList = 'invisible';
 
-
+// var nmtcCSV = Papa.parse("data/nmtc2015.csv", {
+// 	download: true,
+// 	complete: function(results) {
+// 		return results;
+// 	}
+// });
+// var desertsCSV = Papa.parse("data/deserts2020.csv", {
+// 	download: true,
+// 	complete: function(results) {
+// 		return results;
+// 	}
+// });
+//
+// Promise.all([cdfiCSV,nmtcCSV,desertsCSV]).then((data) => {
+//   console.log(data);
+// });
 
 map.on('load', () => {
   //
@@ -49,6 +65,26 @@ map.on('load', () => {
     }
   });
 
+  Papa.parse("data/cdfi2015.csv", {
+  	download: true,
+    header: true,
+    complete: function(results) {
+      console.log(results.data);
+      results.data.forEach((row) => {
+        map.setFeatureState(
+          {
+            source: "ct2010",
+            sourceLayer: "CensusTract",
+            id: row.ct2010,
+          },
+          {
+            cdfi2015: row.ia2015,
+          }
+        );
+      });
+    }
+  });
+
   // Add a data source containing GeoJSON data.
   // map.addSource('ct2010', {
   //   'type': 'geojson',
@@ -61,12 +97,17 @@ map.on('load', () => {
     'type': 'fill',
     'source': 'ct2010', // reference the data source
     "source-layer": "CensusTract",
-    'layout': {},
+    'layout': { },
     'paint': {
       'fill-color': 'rgb(13,40,75)',
-      'fill-opacity': 0.5
+      'fill-opacity': [
+        "case",
+        ["==", ["feature-state", "cdfi2015"], "YES"],
+        0.5,
+        0
+      ]
     },
-    'filter': ['==', 'cdfi2015', true]
+
 
   });
   map.addLayer({
