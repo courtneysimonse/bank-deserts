@@ -6,29 +6,12 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZ
   projection: 'albers',
   maxTileCacheSize: null,
   center: [-97, 39], // starting position
-  minZoom: 6,
+  minZoom: 3,
   zoom: 6 // starting zoom
 });
 
 const spinner = document.getElementById('spin');
 spinner.classList = 'invisible';
-
-// var nmtcCSV = Papa.parse("data/nmtc2015.csv", {
-// 	download: true,
-// 	complete: function(results) {
-// 		return results;
-// 	}
-// });
-// var desertsCSV = Papa.parse("data/deserts2020.csv", {
-// 	download: true,
-// 	complete: function(results) {
-// 		return results;
-// 	}
-// });
-//
-// Promise.all([cdfiCSV,nmtcCSV,desertsCSV]).then((data) => {
-//   console.log(data);
-// });
 
 map.on('load', () => {
   //
@@ -85,6 +68,7 @@ map.on('load', () => {
     }
   });
 
+
   // Add a data source containing GeoJSON data.
   // map.addSource('ct2010', {
   //   'type': 'geojson',
@@ -106,10 +90,29 @@ map.on('load', () => {
         0.5,
         0
       ]
-    },
-
-
+    }
   });
+
+  Papa.parse("data/nmtc2015.csv", {
+  	download: true,
+    header: true,
+    complete: function(results) {
+      console.log(results.data);
+      results.data.forEach((row) => {
+        map.setFeatureState(
+          {
+            source: "ct2010",
+            sourceLayer: "CensusTract",
+            id: row.GEOID2010,
+          },
+          {
+            nmtc2015: row["NMTC"],
+          }
+        );
+      });
+    }
+  });
+
   map.addLayer({
     'id': 'nmtc',
     'type': 'fill',
@@ -118,9 +121,33 @@ map.on('load', () => {
     'layout': {},
     'paint': {
       'fill-color': 'rgb(0,155,177)',
-      'fill-opacity': 0.5
-    },
-    'filter': ['==', 'nmtc2015', true]
+      'fill-opacity': [
+        "case",
+        ["==", ["feature-state", "nmtc2015"], "Yes"],
+        0.5,
+        0
+      ]
+    }
+  });
+
+  Papa.parse("data/deserts2020.csv", {
+  	download: true,
+    header: true,
+    complete: function(results) {
+      console.log(results.data);
+      results.data.forEach((row) => {
+        map.setFeatureState(
+          {
+            source: "ct2010",
+            sourceLayer: "CensusTract",
+            id: row.geoid,
+          },
+          {
+            deserts2020: "Yes",
+          }
+        );
+      });
+    }
   });
   map.addLayer({
     'id': 'deserts',
@@ -130,9 +157,13 @@ map.on('load', () => {
     'layout': {},
     'paint': {
       'fill-color': 'rgb(128,154,28)',
-      'fill-opacity': 0.5
-    },
-    'filter': ['==', 'deserts2020', true]
+      'fill-opacity': [
+        "case",
+        ["==", ["feature-state", "deserts2020"], "Yes"],
+        0.5,
+        0
+      ]
+    }
   });
 
 
