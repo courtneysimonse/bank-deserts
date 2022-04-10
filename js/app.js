@@ -4,7 +4,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZ
   // style: null,
   style: 'mapbox://styles/mapbox/light-v10', // style URL
   projection: 'albers',
-  maxTileCacheSize: null,
+  // maxTileCacheSize: null,
   center: [-97, 39], // starting position
   minZoom: 6,
   zoom: 6 // starting zoom
