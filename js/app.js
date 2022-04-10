@@ -1,12 +1,12 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZWIyd28xdDJ2MXduNTcifQ.PoSFtqfsq1di1IDXzlN4PA';
   const map = new mapboxgl.Map({
   container: 'mapid', // container ID
-  style: null,
-  // style: 'mapbox://styles/mapbox/light-v10', // style URL
+  // style: null,
+  style: 'mapbox://styles/mapbox/light-v10', // style URL
   projection: 'albers',
-  maxTileCacheSize: null,
+  maxTileCacheSize: 10,
   center: [-97, 39], // starting position
-  minZoom: 3,
+  minZoom: 6,
   zoom: 6 // starting zoom
 });
 
@@ -37,22 +37,22 @@ map.on('load', () => {
     promoteId: "GEOID" // promote field to be used as a foreign key
   })
 
-  map.addLayer({
-    id: "ct-fill",
-    type: "fill",
-    source: "ct2010",
-    "source-layer": "CensusTract",
-    paint: {
-      "fill-opacity": 0.8,
-      "fill-color": "grey"
-    }
-  });
+  // map.addLayer({
+  //   id: "ct-fill",
+  //   type: "fill",
+  //   source: "ct2010",
+  //   "source-layer": "CensusTract",
+  //   paint: {
+  //     "fill-opacity": 0.8,
+  //     "fill-color": "grey"
+  //   }
+  // });
 
   Papa.parse("data/cdfi2015.csv", {
   	download: true,
     header: true,
     complete: function(results) {
-      console.log(results.data);
+      // console.log(results.data);
       results.data.forEach((row) => {
         map.setFeatureState(
           {
@@ -97,7 +97,7 @@ map.on('load', () => {
   	download: true,
     header: true,
     complete: function(results) {
-      console.log(results.data);
+      // console.log(results.data);
       results.data.forEach((row) => {
         map.setFeatureState(
           {
@@ -134,7 +134,7 @@ map.on('load', () => {
   	download: true,
     header: true,
     complete: function(results) {
-      console.log(results.data);
+      // console.log(results.data);
       results.data.forEach((row) => {
         map.setFeatureState(
           {
