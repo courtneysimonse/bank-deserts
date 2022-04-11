@@ -3,7 +3,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY291cnRuZXlzaW1vbnNlIiwiYSI6ImNqZGozNng0NjFqZ
   container: 'mapid', // container ID
   // style: null,
   style: 'mapbox://styles/mapbox/light-v10', // style URL
-  projection: 'albers',
+  // projection: 'albers',
   maxTileCacheSize: null,
   center: [-97, 39], // starting position
   minZoom: 6,
